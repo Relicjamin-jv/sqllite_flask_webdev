@@ -41,7 +41,11 @@ class Author(db.Model):
 
 with app.app_context():
     db.create_all()
-    db.drop_all()
+    #db.drop_all()
+
+@app.get("/")
+def to_lib():
+    return redirect(url_for("get_library"))
 
 # TODO: add route to get author form
 @app.get('/authors/')
@@ -56,15 +60,14 @@ def post_author():
     if form.validate():
         # form data is valid
         author = Author(firstName=form.firstName.data, lastName=form.lastName.data, middleInitial=form.middleInitial.data)
-        print(author.firstName)
         db.session.add(author) 
         db.session.commit()
-        return f"Successfully sent object to server"
+        return redirect(url_for("get_library"))
     else:
         # form is not valid 
         for field, error, in form.errors.items():
             flash(f"{field}, {error}")
-        return redirect(url_for("authors"))
+        return redirect(url_for("get_authors"))
 
 
 # TODO: complete route to get book form
@@ -73,6 +76,16 @@ def get_book_form():
     book_form = BookForm()
     # TODO: get a list of names and ids from the database for author.choices
     book_form.author.choices = [] # TODO: use that list here
+    
+    authors = Author.query.all()
+
+    for a in authors:
+        aid = f'{a.id}'
+        author = f'{a.firstName}, {a.middleInitial}, {a.lastName}'
+        book_form.author.choices.append((aid, author))
+    
+    return render_template("get_books.html", form=book_form)
+
     # author.choices should of type -- list of (value,label) tuples of strings
     #     value -- the value that will be submitted
     #     label -- the user readable name of that option in the dropdown menu
@@ -84,8 +97,29 @@ def get_book_form():
 @app.post('/books/')
 def post_book_form():
     book_form = BookForm()
+    book_form.author.choices = []
+
+    authors = Author.query.all()
+
+    for a in authors: # Didn't know that I had to repopulate the []
+        aid = f'{a.id}'
+        author = f'{a.firstName}, {a.middleInitial}, {a.lastName}'
+        book_form.author.choices.append((aid, author))
+
     # TODO: get a list of names and ids from the database for author.choices
-    book_form.author.choices = [] # TODO: use that list here
+    if book_form.validate(): 
+        #book_form.author.choices = [] # TODO: use that list here
+        book = Book(authorID=book_form.author.data, title=book_form.title.data, year=book_form.year.data)
+        db.session.add(book)
+        db.session.commit()
+        return redirect(url_for("get_library"))  
+    else:
+        print(book_form.author.data, type(book_form.author.data))
+        for field, error, in book_form.errors.items():
+            flash(f"{field}, {error}")
+        return redirect(url_for("get_book_form"))
+    
+
     # author.choices should of type -- list of (value,label) tuples of strings
     #     value -- the value that will be submitted
     #     label -- the user readable name of that option in the dropdown menu
@@ -94,5 +128,16 @@ def post_book_form():
     #     label -- Author.firstName Author.middleInitial Author.lastName
 
 # TODO: add route to get list of books
+@app.get("/library/")
+def get_library():
+    # get all books
+    books = Book.query.all()
+    library = []
+    # get authors representing those books
+    for b in books:
+        author = Author.query.get_or_404(b.authorID)
+        print(author)
+        library.append((b, author))
 
-# TODO: add route at index to redirect to list of books
+    return render_template("get_library.html", library=library)
+

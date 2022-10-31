@@ -20,17 +20,19 @@
         </ul>
     </div>
     <h1>Author Form</h1>
-    <form action="/authors/" method="post">
+    <form action="/books/" method="post">
         {#CSRF protection#}
         {{ form.hidden_tag() }}
-        {{ form.firstName.label }}
-        {{ form.firstName() }}
-        {{ form.middleInitial.label }}
-        {{ form.middleInitial() }}
-        {{ form.lastName.label }}
-        {{ form.lastName() }}
+        {{ form.author.label  }}
+        {{ form.author() }}
+        {{ form.title.label }}
+        {{ form.title() }}
+        {{ form.year.label }}
+        {{ form.year() }}
         {#add a submit button#}
         {{ form.submit() }}
     </form>
+    <a href="http://localhost:5000/authors/">Add Author</a>
+    <a href="http://localhost:5000/">View Books</a>
 </body>
 </html>

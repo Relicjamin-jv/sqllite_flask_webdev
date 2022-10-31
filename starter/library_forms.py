@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms.fields import StringField, IntegerField, SubmitField, SelectField
-from wtforms.validators import InputRequired, Optional, Length
+from wtforms.fields import StringField, IntegerField, SubmitField, SelectField, IntegerField
+from wtforms.validators import InputRequired, Optional, Length 
 
 class AuthorForm(FlaskForm):
     firstName = StringField("First Name", validators=[InputRequired()])
@@ -11,5 +11,9 @@ class AuthorForm(FlaskForm):
 class BookForm(FlaskForm):    
     # You will need to update the value of choices after creating an instance 
     # of your form in your handler. This is noted in app.py as well.
-    author = SelectField("Author: ", choices=[])
+    author = SelectField("Author: ", choices=[]) 
     # TODO: add fields with validators for title and year
+    title = StringField("Title", validators=[InputRequired()])
+    year = IntegerField("Year", validators=[InputRequired()])
+    submit = SubmitField("Submit")
+
