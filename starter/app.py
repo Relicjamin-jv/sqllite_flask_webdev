@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for, abort
 from flask import flash
 from flask_sqlalchemy import SQLAlchemy
+from library_forms import AuthorForm, BookForm
 
 # make sure the script's directory is in Python's import path
 # this is only required when run from a different directory
@@ -43,8 +44,28 @@ with app.app_context():
     db.drop_all()
 
 # TODO: add route to get author form
+@app.get('/authors/')
+def get_author():
+    form = AuthorForm()
+    return render_template("get_author.html", form=form)
 
 # TODO: add route to post author form
+@app.post('/authors/')
+def post_author():
+    form = AuthorForm()
+    if form.validate():
+        # form data is valid
+        author = Author(firstName=form.firstName.data, lastName=form.lastName.data, middleInitial=form.middleInitial.data)
+        print(author.firstName)
+        db.session.add(author) 
+        db.session.commit()
+        return f"Successfully sent object to server"
+    else:
+        # form is not valid 
+        for field, error, in form.errors.items():
+            flash(f"{field}, {error}")
+        return redirect(url_for("authors"))
+
 
 # TODO: complete route to get book form
 @app.get('/books/')
